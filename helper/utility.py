@@ -79,5 +79,7 @@ def get_col_to_drop_non_unique(df):
     print(f"{len(temp)} has been flagged out\n")  
     return temp  
 
-
-
+def float_to_categorical(df, col):
+    df[col] = df[col] - df[col].min()  # Convert the categories to have smaller labels (start from 0)
+    df.loc[df[col].isnull(), col] = -1
+    df[col] = df[col].astype(int).astype('category')
