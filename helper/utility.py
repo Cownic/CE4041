@@ -76,10 +76,35 @@ def get_col_to_drop_non_unique(df):
             num_uniques -= 1
         if (num_uniques == 1):
             temp.append(col)
-    print(f"{len(temp)} has been flagged out\n")  
-    return temp  
+    print(f"{len(temp)} has been flagged out\n")
+    return temp
 
 def float_to_categorical(df, col):
     df[col] = df[col] - df[col].min()  # Convert the categories to have smaller labels (start from 0)
     df.loc[df[col].isnull(), col] = -1
     df[col] = df[col].astype(int).astype('category')
+
+
+class NACellFillers:
+    '''Various methods for filling NA values'''
+
+    @staticmethod
+    def mode(col: pd.Series) -> any:
+        '''Get the most common value in the series'''
+
+        values = col[col.notna()]
+        return values.mode().tolist()[0]
+
+    @staticmethod
+    def mean(col: pd.Series) -> float:
+        '''Get the average in the series'''
+
+        values = col[col.notna()]
+        return values.mean()
+
+    @staticmethod
+    def median(col: pd.Series) -> float:
+        '''Get the average in the series'''
+
+        values = col[col.notna()]
+        return values.median()
