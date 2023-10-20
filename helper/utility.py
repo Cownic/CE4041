@@ -4,7 +4,7 @@ import gc  # garbage collection
 from catboost import CatBoostRegressor, Pool
 import lightgbm as lgb
 from sklearn.model_selection import train_test_split
-
+import random
 
 def load_data(file_path):
     return pd.read_csv(file_path, low_memory=False)
@@ -183,7 +183,8 @@ def drop_features(df):
     # too many missing
     missing_list = [
         "buildingclasstypeid",
-        "architecturalstyletypeid" "storytypeid",
+        "architecturalstyletypeid" ,
+        "storytypeid",
         "finishedsquarefeet13",
         "basementsqft",
         "yardbuildingsqft26",
@@ -202,7 +203,7 @@ def drop_features(df):
     unused_feature_list += bad_feature_list
 
     # hurts performance
-    unused_feature_list += ["propertycountylandusecode", "propertyzoningdesc_id"]
+    unused_feature_list += ['propertycountylandusecode_id', 'propertyzoningdesc_id']
 
     return df.drop(unused_feature_list, axis=1, errors="ignore")
 
@@ -226,19 +227,10 @@ def prepare_training(X, y):
     return X_train, X_val, y_train, y_val
 
 
-def get_categorical_indices(df):
-    categorical_features = [
-        "cooling_id",
-        "heating_id",
-        "landuse_type_id",
-        "year",
-        "month",
-        "quarter",
-    ]
-
+def get_categorical_indices(df , feature_list):
     categorical_indexes = []
     for i, n in enumerate(df.columns):
-        if n in categorical_features:
+        if n in feature_list:
             categorical_indexes.append(i)
     print(categorical_indexes)
     return categorical_indexes
@@ -297,11 +289,13 @@ def predict_and_export(models, features_2016, features_2017, file_name):
     for i, model in enumerate(models):
         print("Start model {} (2016)".format(i))
         pred_2016.append(
-            model.predict(test_features_2016, predict_disable_shape_check=True)
+            #model.predict(test_features_2016, predict_disable_shape_check=True)
+            model.predict(test_features_2016)
         )
         print("Start model {} (2017)".format(i))
         pred_2017.append(
-            model.predict(test_features_2017, predict_disable_shape_check=True)
+            #model.predict(test_features_2017, predict_disable_shape_check=True)
+            model.predict(test_features_2017)
         )
 
     # Take average across all models
