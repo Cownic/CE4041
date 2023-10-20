@@ -46,7 +46,7 @@ def print_percent_missing(df):
         print(f"{feature} : {m_percent:.2f}%\n")
 
 # Add Day, Month, Year and which quarter the transaction was done
-def add_dmy_feature(df):
+def add_dmy_feature(df: pd.DataFrame):
     df["quarter"] = df["transactiondate"].dt.quarter
     df["day"] = df["transactiondate"].dt.day
     df["transaction_year"] = df["transactiondate"].dt.year
