@@ -1,10 +1,10 @@
 import pandas as pd
 
-lgb_single = pd.read_csv('submission_lightgbm.csv')
-catboost = pd.read_csv('submission_002.csv')
+lgb_single = pd.read_csv('1.csv')
+catboost = pd.read_csv('2.csv')
 print("Finished Loading the prediction results.")
 
-weight = 0.4
+weight = 0.5
 stack = pd.DataFrame()
 stack['ParcelId'] = lgb_single['ParcelId']
 for col in ['201610', '201611', '201612', '201710', '201711', '201712']:
