@@ -1,0 +1,38 @@
+# Strip [all] notebooks of output
+
+name: strip-notebooks
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  strip:
+    runs-on: ubuntu-latest
+
+    # perms
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: install nbstripout
+        run: pip3 install nbstripout
+
+      - name: run nbstripout
+        run: |
+          NOTEBOOKS=$(find -name *.ipynb)
+          for NB in $NOTEBOOKS; do nbstripout $NB; done
+
+      # automagically commits all changed files: stripped notebooks
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "automatic action: strip notebooks"
