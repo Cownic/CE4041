@@ -1,7 +1,6 @@
 #!/bin/python3
 # run this file in it's current directory
 
-from helper import utility
 import pandas as pd
 import numpy as np
 from catboost import CatBoostRegressor, Pool
@@ -12,12 +11,14 @@ import sys
 
 sys.path.append("..")
 
+from helper import utility
+
 DATA_DIR: str = "../data"
 
 CATBOOST_PARAMS = {
-    'iterations': 500,
+    'iterations': 100,
     'learning_rate': 0.05,
-    'depth': 15,
+    'depth': 16,
     'verbose': 20,
     #     'l2_leaf_reg': 1000,
     'task_type': 'CPU',
