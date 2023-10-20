@@ -274,7 +274,7 @@ def transform_test_features(features_2016, features_2017):
 """
 
 
-def predict_and_export(models, features_2016, features_2017, file_name):
+def predict_and_generate_csv(models, features_2016, features_2017, file_name):
     # Construct DataFrame for prediction results
     submission_2016 = pd.DataFrame()
     submission_2017 = pd.DataFrame()
@@ -302,6 +302,7 @@ def predict_and_export(models, features_2016, features_2017, file_name):
     mean_pred_2016 = np.mean(pred_2016, axis=0)
     mean_pred_2017 = np.mean(pred_2017, axis=0)
 
+    # We assume that the prediction are the same for all months in the same year
     submission_2016["201610"] = [float(format(x, ".4f")) for x in mean_pred_2016]
     submission_2016["201611"] = submission_2016["201610"]
     submission_2016["201612"] = submission_2016["201610"]
