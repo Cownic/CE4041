@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 import gc
 import matplotlib.pyplot as plt
 import sys
+import json
 
 sys.path.append("..")
 
@@ -16,18 +17,27 @@ from helper import utility
 DATA_DIR: str = "../data"
 
 CATBOOST_PARAMS = {
-    'iterations': 100,
-    'learning_rate': 0.05,
-    'depth': 16,
+    'iterations': 2000,
+    'learning_rate': 0.002,
+    'depth': 8,
     'verbose': 20,
     #     'l2_leaf_reg': 1000,
-    'task_type': 'CPU',
+    'task_type': 'GPU',
     'loss_function': 'MAE',
     'eval_metric': 'MAE',
     'random_seed': 0,
 }
 
 N_ENSEMBLES = 8
+
+# grid search
+GRID = {
+    "learning_rate": [0.001, 0.002, 0.005, 0.01, 0.02, 0.05],
+    "depth": [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+    "l2_leaf_reg": [2, 4, 8, 16, 24],
+    "iterations": [100, 500, 1000, 2000, 4000]
+
+}
 
 
 def add_date_features(df: pd.DataFrame):
@@ -91,7 +101,19 @@ train_pool = Pool(X_train, y_train)
 test_pool = Pool(X_test, y_test)
 
 model = CatBoostRegressor(**CATBOOST_PARAMS)
-model.fit(train_pool, eval_set=test_pool)
+# model.fit(train_pool, eval_set=test_pool)
+best_fit_params = model.grid_search(
+    GRID,
+    all_pool,
+    cv=5,
+    verbose=20,
+
+    # test_pool,
+
+)
+
+print("best fit params:")
+print(json.dumps(best_fit_params, indent=2))
 
 print_feature_importance(model, train_pool, X_train)
 
@@ -108,15 +130,15 @@ test_dates = {
     '201712': pd.Timestamp('2017-11-30')
 }
 
-# ensemble models
-models: list[CatBoostRegressor] = [None] * N_ENSEMBLES
-for i in range(N_ENSEMBLES):
-    print("\nTraining (ensemble): %d ..." % (i))
-    CATBOOST_PARAMS['random_seed'] = i
-    models[i] = CatBoostRegressor(**CATBOOST_PARAMS)
-    models[i].fit(train_pool, eval_set=test_pool)
-    print('-- Feature Importance --')
-    print_feature_importance(models[i], train_pool, X_train)
+# # ensemble models
+# models: list[CatBoostRegressor] = [None] * N_ENSEMBLES
+# for i in range(N_ENSEMBLES):
+#     print("\nTraining (ensemble): %d ..." % (i))
+#     CATBOOST_PARAMS['random_seed'] = i
+#     models[i] = CatBoostRegressor(**CATBOOST_PARAMS)
+#     models[i].fit(train_pool, eval_set=test_pool)
+#     print('-- Feature Importance --')
+#     print_feature_importance(models[i], train_pool, X_train)
 
 
 for label, test_date in test_dates.items():
@@ -124,16 +146,21 @@ for label, test_date in test_dates.items():
     test_df['transactiondate'] = test_date
     test_df = add_date_features(test_df)
     test_df = utility.add_dmy_feature(test_df)
-    y_pred = 0.0
-    for i in range(N_ENSEMBLES):
-        print("Ensemble:", i)
-        y_pred += models[i].predict(test_df[model_features])
-    y_pred /= N_ENSEMBLES
-    submission[label] = y_pred
+    # y_pred = 0.0
+
+    prediction = model.predict(test_df[model_features])
+    submission[label] = prediction
+
+    # for i in range(N_ENSEMBLES):
+    #     print("Ensemble:", i)
+    #     y_pred += models[i].predict(test_df[model_features])
+    # y_pred /= N_ENSEMBLES
+    # submission[label] = y_pred
 
 print("Creating submission: submission ...")
+found_params = best_fit_params["params"]
 submission.to_csv(
-    f'{DATA_DIR}/submission_iter{CATBOOST_PARAMS["iterations"]}_depth{CATBOOST_PARAMS["depth"]}_l{CATBOOST_PARAMS["learning_rate"]}_e{N_ENSEMBLES}.csv',
+    f'{DATA_DIR}/submission_iter{found_params["iterations"]}_depth{found_params["depth"]}_l{found_params["learning_rate"]}.csv',
     float_format='%.4f',
     index=False)
 print("Finished.")
