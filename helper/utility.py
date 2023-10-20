@@ -1,10 +1,34 @@
 import numpy as np
 import pandas as pd
 import gc  # garbage collection
+from catboost import CatBoostRegressor, Pool
+import lightgbm as lgb
+from sklearn.model_selection import train_test_split
 
 
 def load_data(file_path):
     return pd.read_csv(file_path, low_memory=False)
+
+def load_properties_data(file_name):
+
+    # Helper function for parsing the flag attributes
+    def convert_true_to_float(df, col):
+        df.loc[df[col] == 'true', col] = '1'
+        df.loc[df[col] == 'Y', col] = '1'
+        df[col] = df[col].astype(float)
+
+    prop = pd.read_csv(file_name, dtype={
+        'propertycountylandusecode': str,
+        'hashottuborspa': str,
+        'propertyzoningdesc': str,
+        'fireplaceflag': str,
+        'taxdelinquencyflag': str
+    })
+
+    for col in ['hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag']:
+        convert_true_to_float(prop, col)
+
+    return prop
 
 
 ####################### BLACK BOX IDK WHAT THEY DOING HERE################################
@@ -178,7 +202,7 @@ def drop_features(df):
     unused_feature_list += bad_feature_list
 
     # hurts performance
-    unused_feature_list += ["propertycountylandusecode", "zoning_description_id"]
+    unused_feature_list += ["propertycountylandusecode", "propertyzoningdesc_id"]
 
     return df.drop(unused_feature_list, axis=1, errors="ignore")
 
