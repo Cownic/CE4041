@@ -30,6 +30,7 @@ jobs:
       - name: run nbstripout
         run: |
           NOTEBOOKS=$(find -name *.ipynb)
+          echo "found: $NOTEBOOKS"
           for NB in $NOTEBOOKS; do nbstripout $NB; done
 
       # automagically commits all changed files: stripped notebooks
