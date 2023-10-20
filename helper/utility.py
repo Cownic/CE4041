@@ -83,3 +83,4 @@ def float_to_categorical(df, col):
     df[col] = df[col] - df[col].min()  # Convert the categories to have smaller labels (start from 0)
     df.loc[df[col].isnull(), col] = -1
     df[col] = df[col].astype(int).astype('category')
+
