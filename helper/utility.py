@@ -207,26 +207,6 @@ def drop_features(df):
 
     return df.drop(unused_feature_list, axis=1, errors="ignore")
 
-
-def prepare_training(X, y):
-    # Transform to Numpy matrices
-
-    # Perform shuffled train/test split
-    np.random.seed(42)
-    random.seed(10)
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2)
-
-    # Remove outlier examples from X_train and y_train; Keep them in X_val and y_val for proper cross-validation
-    X_train, y_train = remove_outliers(X_train, y_train)
-
-    print("X_train shape: {}".format(X_train.shape))
-    print("y_train shape: {}".format(y_train.shape))
-    print("X_val shape: {}".format(X_val.shape))
-    print("y_val shape: {}".format(y_val.shape))
-
-    return X_train, X_val, y_train, y_val
-
-
 def get_categorical_indices(df , feature_list):
     categorical_indexes = []
     for i, n in enumerate(df.columns):
